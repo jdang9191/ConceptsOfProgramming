@@ -1,0 +1,18 @@
+//check which values are truthy and falsey
+fun report(name, value) {
+  print name;
+
+  if (value) {
+    print "truthy";
+  } else {
+    print "falsey";
+  }
+}
+
+//run truthiness checks
+report("true", true);
+report("false", false);
+report("nil", nil);
+report("0", 0);
+report("empty string", "");
+report("nonempty string", "lox");

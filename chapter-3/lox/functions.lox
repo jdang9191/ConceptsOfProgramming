@@ -1,0 +1,13 @@
+//add two numbers and return the result
+fun add(left, right) {
+  return left + right;
+}
+
+//print a greeting without returning a value
+fun sayHello(name) {
+  print "Hello, " + name;
+}
+
+//show a normal return and an implicit nil return
+print add(2, 3);
+print sayHello("lox");

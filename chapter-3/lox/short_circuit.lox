@@ -1,0 +1,16 @@
+//print a message and return it so see when a call happens.
+fun sideEffect(message) {
+  print message;
+  return message;
+}
+
+//check short-circuit behavior for and/or
+print false and sideEffect("false and functionCall() should not run");
+print true or sideEffect("true or functionCall() should not run");
+
+print true and sideEffect("true and functionCall() should run");
+print false or sideEffect("false or functionCall() should run");
+
+//show that these operators return operand values
+print "left" and "right";
+print nil or "fallback";

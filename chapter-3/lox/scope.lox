@@ -1,0 +1,13 @@
+//define a global variable
+var name = "global";
+
+//print the global value
+print name;
+
+//shadow the global inside a block
+{
+  var name = "block";
+  print name;
+}
+
+print name;

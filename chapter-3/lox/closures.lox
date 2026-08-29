@@ -1,0 +1,21 @@
+//create a counter function that keeps its own state
+fun makeCounter() {
+  var count = 0;
+
+  // This inner function closes over count.
+  fun increment() {
+    count = count + 1;
+    print count;
+  }
+
+  return increment;
+}
+
+var counterA = makeCounter();
+var counterB = makeCounter();
+
+counterA();
+counterA();
+counterB();
+counterA();
+counterB();

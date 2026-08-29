@@ -1,0 +1,28 @@
+//simple base class with fields and a method
+class Pair {
+  init(left, right) {
+    this.left = left;
+    this.right = right;
+  }
+
+  describe() {
+    print this.left;
+    print this.right;
+  }
+}
+
+//subclass that reuses the base method with super
+class LoudPair < Pair {
+  describe() {
+    super.describe();
+    print "loud";
+  }
+}
+
+//create instance and use saved bound method
+var pair = LoudPair("alpha", "beta");
+print pair.left;
+pair.describe();
+
+var savedDescribe = pair.describe;
+savedDescribe();
