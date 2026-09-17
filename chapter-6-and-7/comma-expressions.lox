@@ -1,0 +1,14 @@
+// The left expression runs first, but the comma expression returns the right value.
+var value = 0;
+print (value = 1, value = 2);
+print value;
+
+// Comma expressions are left-associative and have lower precedence than +.
+print (1 + 2, 3 + 4);
+
+// Commas inside calls remain argument separators, not comma expressions.
+fun show(first, second) {
+  print first;
+  print second;
+}
+show(10, 20);
