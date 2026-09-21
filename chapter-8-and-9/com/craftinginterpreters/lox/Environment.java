@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 class Environment {
+  // Distinguishes an uninitialized variable from an initialized nil value.
+  static final Object UNINITIALIZED = new Object();
+
 //> enclosing-field
   final Environment enclosing;
 //< enclosing-field
@@ -22,7 +25,12 @@ class Environment {
 
   Object get(Token name) {
     if (values.containsKey(name.lexeme)) {
-      return values.get(name.lexeme);
+      Object value = values.get(name.lexeme);
+      if (value == UNINITIALIZED) {
+        throw new RuntimeError(name,
+            "Cannot read variable before it is initialized.");
+      }
+      return value;
     }
 //> environment-get-enclosing
 
@@ -70,6 +78,15 @@ class Environment {
 //> Resolving and Binding get-at
   Object getAt(int distance, String name) {
     return ancestor(distance).values.get(name);
+  }
+
+  Object getAt(int distance, Token name) {
+    Object value = ancestor(distance).values.get(name.lexeme);
+    if (value == UNINITIALIZED) {
+      throw new RuntimeError(name,
+          "Cannot read variable before it is initialized.");
+    }
+    return value;
   }
 //< Resolving and Binding get-at
 //> Resolving and Binding assign-at

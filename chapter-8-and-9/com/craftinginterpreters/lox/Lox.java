@@ -15,6 +15,8 @@ public class Lox {
 //< Evaluating Expressions interpreter-instance
 //> had-error
   static boolean hadError = false;
+  // Avoid displaying errors from the REPL's speculative expression parse.
+  static boolean suppressErrors = false;
 //< had-error
 //> Evaluating Expressions had-runtime-error-field
   static boolean hadRuntimeError = false;
@@ -33,7 +35,7 @@ public class Lox {
 //> run-file
   private static void runFile(String path) throws IOException {
     byte[] bytes = Files.readAllBytes(Paths.get(path));
-    run(new String(bytes, Charset.defaultCharset()));
+    run(new String(bytes, Charset.defaultCharset()), false);
 //> exit-code
 
     // Indicate an error in the exit code.
@@ -53,7 +55,7 @@ public class Lox {
       System.out.print("> ");
       String line = reader.readLine();
       if (line == null) break;
-      run(line);
+      run(line, true);
 //> reset-had-error
       hadError = false;
 //< reset-had-error
@@ -61,7 +63,7 @@ public class Lox {
   }
 //< prompt
 //> run
-  private static void run(String source) {
+  private static void run(String source, boolean repl) {
     Scanner scanner = new Scanner(source);
     List<Token> tokens = scanner.scanTokens();
 /* Scanning run < Parsing Expressions print-ast
@@ -73,6 +75,24 @@ public class Lox {
 */
 //> Parsing Expressions print-ast
     Parser parser = new Parser(tokens);
+
+    if (repl) {
+      // Expressions print their values; statements fall back to normal parsing.
+      suppressErrors = true;
+      Expr expression = parser.parseExpression();
+      suppressErrors = false;
+      if (expression != null && !hadError) {
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolveExpression(expression);
+        if (hadError) return;
+        interpreter.interpret(expression);
+        return;
+      }
+
+      // The failed expression attempt may have been a valid statement.
+      hadError = false;
+      parser = new Parser(tokens);
+    }
 /* Parsing Expressions print-ast < Statements and State parse-statements
     Expr expression = parser.parse();
 */
@@ -112,6 +132,7 @@ public class Lox {
 
   private static void report(int line, String where,
                              String message) {
+    if (suppressErrors) return;
     System.err.println(
         "[line " + line + "] Error" + where + ": " + message);
     hadError = true;
