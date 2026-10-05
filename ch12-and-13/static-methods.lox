@@ -1,0 +1,20 @@
+class Math {
+  class square(n) {
+    return n * n;
+  }
+}
+
+print Math.square(3);
+
+class Box {
+  init(value) {
+    this.value = value;
+  }
+
+  getValue() {
+    return this.value;
+  }
+}
+
+var box = Box("kept separate");
+print box.getValue();
