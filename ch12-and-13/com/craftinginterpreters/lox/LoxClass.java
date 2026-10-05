@@ -2,6 +2,7 @@
 package com.craftinginterpreters.lox;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 /* Classes lox-class < Classes lox-class-callable
@@ -37,18 +38,24 @@ class LoxClass extends LoxInstance implements LoxCallable {
   }
 //< lox-class-methods
 //> lox-class-find-method
-  LoxFunction findMethod(String name) {
-    if (methods.containsKey(name)) {
-      return methods.get(name);
+  LoxFunction findMethod(LoxInstance instance, String name) {
+    List<LoxFunction> chain = new ArrayList<>();
+    LoxClass current = this;
+
+    // Keep every override so each bound method can point at the next one.
+    while (current != null) {
+      if (current.methods.containsKey(name)) {
+        chain.add(current.methods.get(name));
+      }
+      current = current.superclass;
     }
 
-//> Inheritance find-method-recurse-superclass
-    if (superclass != null) {
-      return superclass.findMethod(name);
+    LoxFunction next = null;
+    for (LoxFunction method : chain) {
+      next = method.bind(instance, next);
     }
 
-//< Inheritance find-method-recurse-superclass
-    return null;
+    return next;
   }
 //< lox-class-find-method
 
@@ -62,7 +69,7 @@ class LoxClass extends LoxInstance implements LoxCallable {
                      List<Object> arguments) {
     LoxInstance instance = new LoxInstance(this);
 //> lox-class-call-initializer
-    LoxFunction initializer = findMethod("init");
+    LoxFunction initializer = findMethod(instance, "init");
     if (initializer != null) {
       initializer.bind(instance).call(interpreter, arguments);
     }
@@ -77,7 +84,7 @@ class LoxClass extends LoxInstance implements LoxCallable {
     return 0;
 */
 //> lox-initializer-arity
-    LoxFunction initializer = findMethod("init");
+    LoxFunction initializer = findMethod(new LoxInstance(this), "init");
     if (initializer == null) return 0;
     return initializer.arity();
 //< lox-initializer-arity

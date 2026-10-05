@@ -4,7 +4,6 @@ package com.craftinginterpreters.lox;
 //> Statements and State parser-imports
 import static com.craftinginterpreters.lox.TokenType.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 class Parser {
@@ -152,6 +151,7 @@ class Parser {
     if (match(FOR)) return forStatement();
 //< Control Flow match-for
   if (match(BREAK)) return breakStatement();
+    if (match(CONTINUE)) return continueStatement();
 //> Control Flow match-if
     if (match(IF)) return ifStatement();
 //< Control Flow match-if
@@ -207,28 +207,7 @@ class Parser {
     try {
       loopDepth++;
       body = statement();
-
-//> for-desugar-increment
-      if (increment != null) {
-        body = new Stmt.Block(
-            Arrays.asList(
-                body,
-                new Stmt.Expression(increment)));
-      }
-
-//< for-desugar-increment
-//> for-desugar-condition
-      if (condition == null) condition = new Expr.Literal(true);
-      body = new Stmt.While(condition, body);
-
-//< for-desugar-condition
-//> for-desugar-initializer
-      if (initializer != null) {
-        body = new Stmt.Block(Arrays.asList(initializer, body));
-      }
-
-//< for-desugar-initializer
-      return body;
+  return new Stmt.For(initializer, condition, increment, body);
     } finally {
       loopDepth--;
     }
@@ -304,6 +283,14 @@ class Parser {
     }
     consume(SEMICOLON, "Expect ';' after 'break'.");
     return new Stmt.Break();
+  }
+
+  private Stmt continueStatement() {
+    if (loopDepth == 0) {
+      error(previous(), "Must be inside a loop to use 'continue'.");
+    }
+    consume(SEMICOLON, "Expect ';' after 'continue'.");
+    return new Stmt.Continue();
   }
 //> Statements and State parse-expression-statement
   private Stmt expressionStatement() {
@@ -589,16 +576,6 @@ class Parser {
     }
 
     if (match(FUN)) return functionBody("function");
-//> Inheritance parse-super
-
-    if (match(SUPER)) {
-      Token keyword = previous();
-      consume(DOT, "Expect '.' after 'super'.");
-      Token method = consume(IDENTIFIER,
-          "Expect superclass method name.");
-      return new Expr.Super(keyword, method);
-    }
-//< Inheritance parse-super
 //> Classes parse-this
 
     if (match(THIS)) return new Expr.This(previous());

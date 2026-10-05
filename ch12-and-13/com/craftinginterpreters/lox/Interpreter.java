@@ -18,6 +18,7 @@ class Interpreter implements Expr.Visitor<Object>,
 //< Statements and State interpreter
   // Internal control-flow signal used to leave the nearest loop.
   private static class BreakException extends RuntimeException {}
+  private static class ContinueException extends RuntimeException {}
 /* Statements and State environment-field < Functions global-environment
   private Environment environment = new Environment();
 */
@@ -142,13 +143,6 @@ class Interpreter implements Expr.Visitor<Object>,
 
 //< Inheritance interpret-superclass
     environment.define(stmt.name.lexeme, null);
-//> Inheritance begin-superclass-environment
-
-    if (stmt.superclass != null) {
-      environment = new Environment(environment);
-      environment.defineLocal(superclass);
-    }
-//< Inheritance begin-superclass-environment
 //> interpret-methods
 
     Map<String, LoxFunction> classMethods = new HashMap<>();
@@ -180,13 +174,6 @@ class Interpreter implements Expr.Visitor<Object>,
 //> Inheritance interpreter-construct-class
     LoxClass klass = new LoxClass(metaclass, stmt.name.lexeme,
         (LoxClass)superclass, methods);
-//> end-superclass-environment
-
-    if (superclass != null) {
-      environment = environment.enclosing;
-    }
-//< end-superclass-environment
-
 //< Inheritance interpreter-construct-class
 //< interpret-methods
 /* Classes interpreter-visit-class < Classes interpret-methods
@@ -279,7 +266,11 @@ class Interpreter implements Expr.Visitor<Object>,
   public Void visitWhileStmt(Stmt.While stmt) {
     try {
       while (isTruthy(evaluate(stmt.condition))) {
-        execute(stmt.body);
+        try {
+          execute(stmt.body);
+        } catch (ContinueException exception) {
+          // Continue starts the next while iteration.
+        }
       }
     } catch (BreakException exception) {
       // A break exits only the nearest enclosing loop.
@@ -290,6 +281,32 @@ class Interpreter implements Expr.Visitor<Object>,
   @Override
   public Void visitBreakStmt(Stmt.Break stmt) {
     throw new BreakException();
+  }
+
+  @Override
+  public Void visitContinueStmt(Stmt.Continue stmt) {
+    throw new ContinueException();
+  }
+
+  @Override
+  public Void visitForStmt(Stmt.For stmt) {
+    if (stmt.initializer != null) execute(stmt.initializer);
+
+    try {
+      while (stmt.condition == null || isTruthy(evaluate(stmt.condition))) {
+        try {
+          execute(stmt.body);
+        } catch (ContinueException exception) {
+          // The increment still runs below before the next iteration.
+        }
+
+        if (stmt.increment != null) evaluate(stmt.increment);
+      }
+    } catch (BreakException exception) {
+      // Break leaves the entire for loop.
+    }
+
+    return null;
   }
 //> Statements and State visit-assign
   @Override
@@ -412,7 +429,7 @@ class Interpreter implements Expr.Visitor<Object>,
 //< check-is-callable
     LoxCallable function = (LoxCallable)callee;
 //> check-arity
-    if (arguments.size() != function.arity()) {
+    if (function.arity() >= 0 && arguments.size() != function.arity()) {
       throw new RuntimeError(expr.paren, "Expected " +
           function.arity() + " arguments but got " +
           arguments.size() + ".");
@@ -502,7 +519,7 @@ class Interpreter implements Expr.Visitor<Object>,
 //< super-find-this
 //> super-find-method
 
-    LoxFunction method = superclass.findMethod(expr.method.lexeme);
+    LoxFunction method = superclass.findMethod(object, expr.method.lexeme);
 //> super-no-method
 
     if (method == null) {

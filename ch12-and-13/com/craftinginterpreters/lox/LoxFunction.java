@@ -31,8 +31,13 @@ class LoxFunction implements LoxCallable {
   }
 //> Classes bind-instance
   LoxFunction bind(LoxInstance instance) {
+    return bind(instance, null);
+  }
+
+  LoxFunction bind(LoxInstance instance, LoxFunction inner) {
     Environment environment = new Environment(closure);
     environment.defineLocal(instance);
+    environment.defineLocal(inner == null ? new NoOpCallable() : inner);
 /* Classes bind-instance < Classes lox-function-bind-with-initializer
     return new LoxFunction(declaration, environment);
 */
@@ -40,6 +45,13 @@ class LoxFunction implements LoxCallable {
     return new LoxFunction(name, declaration, environment,
                            isInitializer);
 //< lox-function-bind-with-initializer
+  }
+
+  private static class NoOpCallable implements LoxCallable {
+    public int arity() { return -1; }
+    public Object call(Interpreter interpreter, List<Object> arguments) {
+      return null;
+    }
   }
 //< Classes bind-instance
 //> function-to-string

@@ -93,6 +93,11 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   public Void visitBreakStmt(Stmt.Break stmt) {
     return null;
   }
+
+  @Override
+  public Void visitContinueStmt(Stmt.Continue stmt) {
+    return null;
+  }
 //> Classes resolver-visit-class
   @Override
   public Void visitClassStmt(Stmt.Class stmt) {
@@ -120,18 +125,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
       resolve(stmt.superclass);
     }
 //< Inheritance resolve-superclass
-//> Inheritance begin-super-scope
-
-    if (stmt.superclass != null) {
-      beginScope();
-      scopes.peek().put("super", new Variable(null, scopes.peek().size()));
-    }
-//< Inheritance begin-super-scope
 //> resolve-methods
 
 //> resolver-begin-this-scope
     beginScope();
     scopes.peek().put("this", new Variable(null, scopes.peek().size()));
+    scopes.peek().put("inner", new Variable(null, scopes.peek().size()));
 
 //< resolver-begin-this-scope
     for (Stmt.Function method : stmt.methods) {
@@ -148,6 +147,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     for (Stmt.Function method : stmt.classMethods) {
       beginScope();
       scopes.peek().put("this", new Variable(null, scopes.peek().size()));
+      scopes.peek().put("inner", new Variable(null, scopes.peek().size()));
       resolveFunction(method.function, FunctionType.METHOD);
       endScope();
     }
@@ -157,10 +157,6 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
 //< resolver-end-this-scope
 //< resolve-methods
-//> Inheritance end-super-scope
-    if (stmt.superclass != null) endScope();
-
-//< Inheritance end-super-scope
 //> restore-current-class
     currentClass = enclosingClass;
 //< restore-current-class
@@ -252,6 +248,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     return null;
   }
 //< visit-while-stmt
+  @Override
+  public Void visitForStmt(Stmt.For stmt) {
+    if (stmt.initializer != null) resolve(stmt.initializer);
+    if (stmt.condition != null) resolve(stmt.condition);
+    resolve(stmt.body);
+    if (stmt.increment != null) resolve(stmt.increment);
+    return null;
+  }
 //> visit-assign-expr
   @Override
   public Void visitAssignExpr(Expr.Assign expr) {

@@ -1,0 +1,23 @@
+class Base {
+  speak() {
+    print "base";
+    inner();
+  }
+}
+
+class Middle < Base {
+  speak() {
+    print "middle";
+    inner();
+  }
+}
+
+class Child < Middle {
+  speak() {
+    print "child";
+    inner();
+  }
+}
+
+Child().speak();
+Base().speak();

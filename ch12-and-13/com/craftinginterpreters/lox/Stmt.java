@@ -8,8 +8,10 @@ abstract class Stmt {
     R visitBlockStmt(Block stmt);
     R visitBreakStmt(Break stmt);
     R visitClassStmt(Class stmt);
+    R visitContinueStmt(Continue stmt);
     R visitExpressionStmt(Expression stmt);
     R visitFunctionStmt(Function stmt);
+    R visitForStmt(For stmt);
     R visitIfStmt(If stmt);
     R visitPrintStmt(Print stmt);
     R visitReturnStmt(Return stmt);
@@ -26,6 +28,31 @@ abstract class Stmt {
     }
   }
 //< stmt-break
+  static class Continue extends Stmt {
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitContinueStmt(this);
+    }
+  }
+
+  static class For extends Stmt {
+    For(Stmt initializer, Expr condition, Expr increment, Stmt body) {
+      this.initializer = initializer;
+      this.condition = condition;
+      this.increment = increment;
+      this.body = body;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitForStmt(this);
+    }
+
+    final Stmt initializer;
+    final Expr condition;
+    final Expr increment;
+    final Stmt body;
+  }
 //> stmt-block
   static class Block extends Stmt {
     Block(List<Stmt> statements) {

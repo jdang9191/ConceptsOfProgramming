@@ -28,6 +28,16 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
   }
 
   @Override
+  public String visitContinueStmt(Stmt.Continue stmt) {
+    return "continue;";
+  }
+
+  @Override
+  public String visitForStmt(Stmt.For stmt) {
+    return parenthesize2("for", stmt.condition, stmt.body);
+  }
+
+  @Override
   public String visitBlockStmt(Stmt.Block stmt) {
     StringBuilder builder = new StringBuilder();
     builder.append("(block ");
