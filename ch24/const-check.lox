@@ -1,0 +1,5 @@
+var x = 3;
+fun readX() {
+  print x;
+}
+readX();

@@ -1,0 +1,2 @@
+// clock is registered as a zero-argument native function.
+print clock();
