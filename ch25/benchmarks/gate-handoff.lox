@@ -1,0 +1,32 @@
+// A parcel-routing workload with recursive method handoffs and frame returns.
+class Gate {
+  init(offset) {
+    this.offset = offset;
+    this.passes = 0;
+  }
+
+  relay(packet, hops) {
+    this.passes = this.passes + 1;
+    if (hops == 0) return packet + this.offset;
+
+    var adjusted = packet + this.offset;
+    if (adjusted > 997) adjusted = adjusted - 997;
+    return this.relay(adjusted, hops - 1);
+  }
+}
+
+fun routeBatches() {
+  var gate = Gate(37);
+  var packet = 11;
+  var batch = 0;
+  while (batch < 25000) {
+    packet = gate.relay(packet, 4);
+    batch = batch + 1;
+  }
+  print packet;
+  print gate.passes;
+}
+
+var started = clock();
+routeBatches();
+print clock() - started;

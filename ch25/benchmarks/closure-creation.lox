@@ -1,0 +1,21 @@
+var sample = 0;
+while (sample < 5) {
+  var started = clock();
+  var i = 0;
+  var total = 0;
+  while (i < 100000) {
+    fun outer(a, b, c) {
+      fun inner() {
+        return a + b + c;
+      }
+      return inner;
+    }
+
+    var captured = outer(i, i, i);
+    total = total + captured();
+    i = i + 1;
+  }
+  print total;
+  print clock() - started;
+  sample = sample + 1;
+}

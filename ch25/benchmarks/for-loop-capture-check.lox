@@ -1,0 +1,21 @@
+var first = nil;
+var second = nil;
+var third = nil;
+
+for (var i = 0; i < 4; i = i + 1) {
+  fun capture() {
+    return i;
+  }
+
+  if (i == 0) first = capture;
+  if (i == 1) {
+    second = capture;
+    i = 2;
+    continue;
+  }
+  if (i == 3) third = capture;
+}
+
+print first();
+print second();
+print third();

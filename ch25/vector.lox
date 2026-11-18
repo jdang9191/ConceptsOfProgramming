@@ -1,0 +1,22 @@
+fun vector(x, y) {
+  fun dispatch(operation) {
+    if (operation == "x") return x;
+    if (operation == "y") return y;
+    if (operation == "add") {
+      fun add(other) {
+        return vector(x + other("x"), y + other("y"));
+      }
+      return add;
+    }
+
+    print "Unknown vector operation: " + operation;
+  }
+
+  return dispatch;
+}
+
+var first = vector(1, 2);
+var second = vector(3, 4);
+var sum = first("add")(second);
+print sum("x");
+print sum("y");

@@ -1,0 +1,17 @@
+var sample = 0;
+while (sample < 5) {
+  var started = clock();
+  var i = 0;
+  var total = 0;
+  fun increment(value) {
+    return value + 1;
+  }
+
+  while (i < 100) {
+    total = increment(total);
+    i = i + 1;
+  }
+  print total;
+  print clock() - started;
+  sample = sample + 1;
+}

@@ -1,0 +1,3 @@
+var note = "sort files   check tests send notes";
+print wordCount(note);
+print wordCount("   ");

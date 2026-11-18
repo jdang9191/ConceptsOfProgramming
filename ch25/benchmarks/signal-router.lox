@@ -1,0 +1,32 @@
+// A router with branch-heavy local state, no calls in its loop.
+fun routeSignals() {
+  var tick = 0;
+  var lane = 1;
+  var signal = 13;
+  var checksum = 0;
+
+  while (tick < 2000000) {
+    if (signal < 701) {
+      checksum = checksum + lane + 3;
+      lane = lane + 1;
+    } else if (signal < 2101) {
+      checksum = checksum + lane * 2 + 5;
+      lane = lane + 2;
+    } else {
+      checksum = checksum + signal;
+      lane = lane - 1;
+    }
+
+    if (lane > 5) lane = 1;
+    if (lane < 1) lane = 5;
+    signal = signal + lane * 11 + 7;
+    if (signal >= 4096) signal = signal - 4096;
+    tick = tick + 1;
+  }
+
+  print checksum;
+}
+
+var started = clock();
+routeSignals();
+print clock() - started;

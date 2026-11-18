@@ -1,0 +1,11 @@
+var sample = 0;
+while (sample < 3) {
+  var started = clock();
+  var i = 0;
+  while (i < 5000000) {
+    clock();
+    i = i + 1;
+  }
+  print clock() - started;
+  sample = sample + 1;
+}

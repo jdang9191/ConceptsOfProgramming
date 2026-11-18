@@ -1,0 +1,9 @@
+fun a(x) {
+  return x + 1;
+}
+
+fun b(x) {
+  return a(x) + 1;
+}
+
+print b(5);
